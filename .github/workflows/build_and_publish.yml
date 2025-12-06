@@ -14,15 +14,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.x
       - name: Pack
         run: dotnet pack --output nupkgs
         working-directory: ${{env.WORK_DIR}}
       - name: Publish
-        run: nuget push nupkgs/*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
-        working-directory: ${{env.WORK_DIR}}
+          working-directory: ${{ env.WORK_DIR }}
+          env:
+            NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          run: |
+            dotnet nuget push nupkgs/*.nupkg \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "$NUGET_API_KEY" \
+              --skip-duplicate

@@ -88,6 +88,8 @@ static void WalkSmartPath(SmartTurtle turtle)
     
     Console.WriteLine($"Turtle has moved: {turtle.TravelDistanceMeters:F1} meters");
 
+    return;
+
     static Point GetPointByOffset(Point origin, double xOffset, double yOffset) 
         => new(origin.X + xOffset, origin.Y + yOffset);
 }
