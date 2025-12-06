@@ -5,7 +5,6 @@ on:
 
 jobs:
   build:
-    
     env:
       BUILD_CONFIG: 'Release'
       WORK_DIR: 'LeoTurtle'
@@ -14,19 +13,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
       - name: Pack
+        working-directory: ${{ env.WORK_DIR }}
         run: dotnet pack --output nupkgs
-        working-directory: ${{env.WORK_DIR}}
+
       - name: Publish
-          working-directory: ${{ env.WORK_DIR }}
-          env:
-            NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-          run: |
-            dotnet nuget push nupkgs/*.nupkg \
-              --source https://api.nuget.org/v3/index.json \
-              --api-key "$NUGET_API_KEY" \
-              --skip-duplicate
+        working-directory: ${{ env.WORK_DIR }}
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push nupkgs/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" \
+            --skip-duplicate
