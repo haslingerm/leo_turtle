@@ -8,16 +8,25 @@ namespace LeoTurtle;
 public static class Beach
 {
     private const double MeterPixelFactor = 10D;
+    private const int MaxMeters = (int) (int.MaxValue / MeterPixelFactor);
     
     /// <summary>
     ///     Prepares the beach for the turtle to walk on
     /// </summary>
     /// <param name="turtlePath">Method that describes the movement of the turtle</param>
-    /// <param name="lengthMeters">The horizontal lenght of the beach</param>
+    /// <param name="lengthMeters">The horizontal length of the beach</param>
     /// <param name="widthMeters">The vertical width of the beach</param>
+    /// <exception cref="ArgumentNullException"><paramref name="turtlePath"/> is null</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Length or width is not a positive number of meters</exception>
     /// <typeparam name="T">Either a <see cref="Turtle"/> or <see cref="SmartTurtle"/> depending on assignment</typeparam>
     public static void Prepare<T>(TurtlePath<T> turtlePath, int lengthMeters, int widthMeters) where T : Turtle, new()
     {
+        ArgumentNullException.ThrowIfNull(turtlePath);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(lengthMeters, 0);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(widthMeters, 0);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(lengthMeters, MaxMeters);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(widthMeters, MaxMeters);
+
         var width = ToPixel(lengthMeters);
         var height = ToPixel(widthMeters);
         
