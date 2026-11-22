@@ -124,7 +124,7 @@ public class Turtle
         const double HalfWidth = TurtleImageWidth / 2D;
         const double HalfHeight = TurtleImageHeight / 2D;
 
-        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", TurtleImageFileName);
+        var imagePath = Path.Combine(AppContext.BaseDirectory, "Data", TurtleImageFileName);
 
         var (x, y) = CurrentPosition;
         var leftUpper = new Point(x - HalfWidth, y - HalfHeight);
@@ -137,6 +137,9 @@ public class Turtle
     {
         _maxX = x;
         _maxY = y;
+
+        // the turtle starts in the lower left corner, i.e. at (0, 0) meters
+        CurrentPosition = new Point(0, InvertY(0));
     }
 
     private static double GetPointDistanceInMeters(Point start, Point end)
@@ -164,9 +167,31 @@ public class Turtle
         var radians = angleDegrees * Math.PI / 180;
         var xDelta = distanceX * Math.Cos(radians);
         var yDelta = distanceY * Math.Sin(radians);
-        var point = new Point(origin.X + xDelta, origin.Y + yDelta);
+
+        // shorten the whole movement (instead of clamping each axis separately),
+        // so the turtle stops at the boundary while staying on its line of travel
+        var scale = Math.Min(GetMaxScale(origin.X, xDelta, _maxX), GetMaxScale(origin.Y, yDelta, _maxY));
+        var point = new Point(origin.X + xDelta * scale, origin.Y + yDelta * scale);
 
         return LimitToBoundaries(point);
+    }
+
+    private static double GetMaxScale(double position, double delta, int max)
+    {
+        // ignore floating point noise (e.g. cos(90°) != 0), otherwise a turtle at a wall could never move along it
+        const double Epsilon = 1e-9;
+
+        if (delta > Epsilon && position + delta > max)
+        {
+            return Math.Max(0D, (max - position) / delta);
+        }
+
+        if (delta < -Epsilon && position + delta < 0)
+        {
+            return Math.Max(0D, -position / delta);
+        }
+
+        return 1D;
     }
 
     private Point LimitToBoundaries(Point position)
